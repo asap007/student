@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Performance Dashboard</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Academic Performance Dashboard</h1>
+            <p class="text-gray-600 mt-2">Predicted Rank: <span class="font-semibold text-blue-600">25,000</span> (Range: 24,000-26,000)</p>
+        </div>
+
+        <!-- Performance Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">Difficulty Analysis</h3>
+                <canvas id="difficultyChart"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">Topic Performance</h3>
+                <canvas id="topicChart"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">Improvement Trends</h3>
+                <canvas id="improvementChart"></canvas>
+            </div>
+        </div>
+
+        <!-- College Predictions Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Government Colleges -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Government Colleges</h3>
+                <div class="space-y-4">
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-700">AIIMS Delhi</h4>
+                        <p class="text-sm text-gray-600">Location: Delhi, Delhi</p>
+                        <p class="text-sm text-gray-600">Previous Year Cutoff: 1000-2000</p>
+                        <span class="inline-block px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded">Low Probability</span>
+                    </div>
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-700">MAMC, Delhi</h4>
+                        <p class="text-sm text-gray-600">Location: Delhi, Delhi</p>
+                        <p class="text-sm text-gray-600">Previous Year Cutoff: 2000-3000</p>
+                        <span class="inline-block px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded">Low Probability</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Private Colleges -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Private Colleges</h3>
+                <div class="space-y-4">
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-700">Manipal College of Medical Sciences</h4>
+                        <p class="text-sm text-gray-600">Location: Manipal, Karnataka</p>
+                        <p class="text-sm text-gray-600">Previous Year Cutoff: 25000-30000</p>
+                        <span class="inline-block px-2 py-1 text-xs font-semibold text-yellow-600 bg-yellow-100 rounded">Medium Probability</span>
+                    </div>
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-700">SRM Medical College</h4>
+                        <p class="text-sm text-gray-600">Location: Chennai, Tamil Nadu</p>
+                        <p class="text-sm text-gray-600">Previous Year Cutoff: 30000-35000</p>
+                        <span class="inline-block px-2 py-1 text-xs font-semibold text-yellow-600 bg-yellow-100 rounded">Medium Probability</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Access the data passed from Express
+                const geminiResponse = <%- JSON.stringify(geminiResponse) %>;
+                
+                // Difficulty Analysis Chart
+                const difficultyCtx = document.getElementById('difficultyChart').getContext('2d');
+                new Chart(difficultyCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Easy', 'Medium', 'Hard'],
+                        datasets: [{
+                            data: [
+                                geminiResponse.performance_analysis.difficulty_analysis.easy,
+                                geminiResponse.performance_analysis.difficulty_analysis.medium,
+                                geminiResponse.performance_analysis.difficulty_analysis.hard
+                            ],
+                            backgroundColor: ['#10B981', '#FBBF24', '#EF4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            
+                // Topic Performance Chart
+                const topicCtx = document.getElementById('topicChart').getContext('2d');
+                const topicData = geminiResponse.performance_analysis.topic_wise_performance;
+                new Chart(topicCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: topicData.map(topic => topic.subject),
+                        datasets: [{
+                            label: 'Accuracy',
+                            data: topicData.map(topic => topic.accuracy),
+                            backgroundColor: '#60A5FA'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            
+                // Improvement Trends Chart
+                const improvementCtx = document.getElementById('improvementChart').getContext('2d');
+                const trends = geminiResponse.user_insights.improvement_trends;
+                new Chart(improvementCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Object.keys(trends),
+                        datasets: [{
+                            label: 'Progress',
+                            data: Object.values(trends),
+                            borderColor: '#8B5CF6',
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+            </script>
+    </div>
+</body>
+</html>
