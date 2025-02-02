@@ -49,6 +49,14 @@ Based on the calculated rank, list:
 - Top 3 Private Medical Colleges
 - State-wise college options
 
+5. PREPARATION RECOMMENDATIONS
+Based on performance analysis, provide:
+- Daily Study Schedule
+- Subject-wise Study Strategy
+- Mock Test Taking Tips
+- Last Month Focus Areas
+- Time Management Tips
+
 REQUIRED OUTPUT FORMAT:
 {
   "performance_analysis": {
